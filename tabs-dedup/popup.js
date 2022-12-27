@@ -19,6 +19,8 @@ const tabs = await chrome.tabs.query({
   // ],
 });
 
+console.log(tabs);
+
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/Collator
 const collator = new Intl.Collator();
 tabs.sort((a, b) => collator.compare(a.title, b.title));
@@ -28,8 +30,8 @@ const elements = new Set();
 for (const tab of tabs) {
   const element = template.content.firstElementChild.cloneNode(true);
 
-  const title = tab.title.split("-")[0].trim();
-  const pathname = new URL(tab.url).pathname.slice("/docs".length);
+  const title = tab.title; //.split("-")[0].trim();
+  const pathname = new URL(tab.url).pathname; //.slice("/docs".length);
 
   element.querySelector(".title").textContent = title;
   element.querySelector(".pathname").textContent = pathname;
@@ -45,7 +47,38 @@ document.querySelector("ul").append(...elements);
 
 const button = document.querySelector("button");
 button.addEventListener("click", async () => {
-  const tabIds = tabs.map(({ id }) => id);
-  const group = await chrome.tabs.group({ tabIds });
-  await chrome.tabGroups.update(group, { title: "DOCS" });
+  if(!confirm('Close duplicate tabs?')) return;
+  
+
+  var urls = [], tabsToClose = [];
+  chrome.tabs.query({currentWindow: true}, function(tabs){
+    tabs.reverse().forEach(function(tab){
+      if(~urls.indexOf(tab.url)){
+        tabsToClose.push(tab.id);
+      }else{
+        urls.push(tab.url);
+      }
+    });
+    console.log(tabsToClose);
+    //chrome.tabs.remove(tabsToClose);
+  });
+
+  // const tabIds = tabs.map(({ id }) => id);
+  // const group = await chrome.tabs.group({ tabIds });
+  // await chrome.tabGroups.update(group, { title: "DOCS" });
 });
+
+// chrome.browserAction.onClicked.addListener(function(tab){
+//   if(!confirm('Close duplicate tabs?')) return;
+//   var urls = [], tabsToClose = [];
+//   chrome.tabs.query({currentWindow: true}, function(tabs){
+//     tabs.reverse().forEach(function(tab){
+//       if(~urls.indexOf(tab.url)){
+//         tabsToClose.push(tab.id);
+//       }else{
+//         urls.push(tab.url);
+//       }
+//     });
+//     chrome.tabs.remove(tabsToClose);
+//   });
+// });
