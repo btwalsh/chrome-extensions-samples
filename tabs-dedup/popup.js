@@ -19,7 +19,7 @@ const tabs = await chrome.tabs.query({
   // ],
 });
 
-console.log(tabs);
+//console.log(tabs);
 
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/Collator
 const collator = new Intl.Collator();
@@ -49,24 +49,38 @@ const button = document.querySelector("button");
 button.addEventListener("click", async () => {
   if(!confirm('Close duplicate tabs?')) return;
   
-
-  var urls = [], tabsToClose = [];
+  var dupesFound = 0;
+  var urls = [], tabsToClose = []; //cleanUrlList = [];
   chrome.tabs.query({currentWindow: true}, function(tabs){
-    tabs.reverse().forEach(function(tab){
-      if(~urls.indexOf(tab.url)){
+
+    tabs.forEach(function(tab){
+      if(~urls.indexOf(cleanUrl(tab.url))){
         tabsToClose.push(tab.id);
+        dupesFound++;
       }else{
-        urls.push(tab.url);
+        urls.push(cleanUrl(tab.url));
       }
     });
+
+    document.querySelector("ul").prepend(dupesFound + " dupes closed");
+
+    // const group = chrome.tabs.group({ tabsToClose });
+    // chrome.tabGroups.update(group, {title: "DUPES", color: "red" });
+
     console.log(tabsToClose);
-    //chrome.tabs.remove(tabsToClose);
+    chrome.tabs.remove(tabsToClose);
   });
 
   // const tabIds = tabs.map(({ id }) => id);
   // const group = await chrome.tabs.group({ tabIds });
   // await chrome.tabGroups.update(group, { title: "DOCS" });
 });
+
+function cleanUrl(urlToClean) {
+  var cleanURL = urlToClean.split("#")[0].trim();
+  cleanURL = urlToClean.split("?")[0].trim();
+  return cleanURL;
+}
 
 // chrome.browserAction.onClicked.addListener(function(tab){
 //   if(!confirm('Close duplicate tabs?')) return;
