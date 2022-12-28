@@ -13,13 +13,8 @@
 // limitations under the License.
 
 const tabs = await chrome.tabs.query({
-  // url: [
-  //   "https://developer.chrome.com/docs/webstore/*",
-  //   "https://developer.chrome.com/docs/extensions/*",
-  // ],
+  // url: [ ],
 });
-
-//console.log(tabs);
 
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/Collator
 const collator = new Intl.Collator();
@@ -50,7 +45,7 @@ button.addEventListener("click", async () => {
   if(!confirm('Close duplicate tabs?')) return;
   
   var dupesFound = 0;
-  var urls = [], tabsToClose = []; //cleanUrlList = [];
+  var urls = [], tabsToClose = []; 
   chrome.tabs.query({currentWindow: true}, function(tabs){
 
     tabs.forEach(function(tab){
@@ -70,6 +65,10 @@ button.addEventListener("click", async () => {
     console.log(tabsToClose);
     chrome.tabs.remove(tabsToClose);
   });
+  
+// TODO make this work across windows
+// TODO add all the dupes to be killed to a group so 
+// can bring back in one keystroke
 
   // const tabIds = tabs.map(({ id }) => id);
   // const group = await chrome.tabs.group({ tabIds });
@@ -77,22 +76,6 @@ button.addEventListener("click", async () => {
 });
 
 function cleanUrl(urlToClean) {
-  var cleanURL = urlToClean.split("#")[0].trim();
-  cleanURL = urlToClean.split("?")[0].trim();
+  var cleanURL = urlToClean.split(/[#,?]/)[0].trim();
   return cleanURL;
 }
-
-// chrome.browserAction.onClicked.addListener(function(tab){
-//   if(!confirm('Close duplicate tabs?')) return;
-//   var urls = [], tabsToClose = [];
-//   chrome.tabs.query({currentWindow: true}, function(tabs){
-//     tabs.reverse().forEach(function(tab){
-//       if(~urls.indexOf(tab.url)){
-//         tabsToClose.push(tab.id);
-//       }else{
-//         urls.push(tab.url);
-//       }
-//     });
-//     chrome.tabs.remove(tabsToClose);
-//   });
-// });
